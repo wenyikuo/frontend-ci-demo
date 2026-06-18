@@ -20,6 +20,20 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Testing & CI
+
+Every pull request to `main` must pass all of the following before it can merge:
+
+| Check | Command | Gate |
+| --- | --- | --- |
+| Lint & types | `npm run lint` / `npm run typecheck` | must pass |
+| Unit + component integration | `npm run test:cov` | + overall coverage ≥ 80% |
+| Patch coverage (new code) | `npm run coverage:diff` | changed lines ≥ 90% |
+| End-to-end | `npm run test:e2e` | Playwright must pass |
+
+`main` is protected by a repository ruleset, so changes must go through a PR
+with all checks green.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
