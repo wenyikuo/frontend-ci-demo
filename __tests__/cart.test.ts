@@ -14,3 +14,10 @@ describe('cartTotal', () => {
     expect(cartTotal([])).toBe(0)
   })
 })
+
+describe('cartItemCount', () => {
+  it('sums quantities', () => {
+    const { cartItemCount } = require('@/lib/cart') as typeof import('@/lib/cart')
+    expect(cartItemCount([{ price: 1, quantity: 2 }, { price: 9, quantity: 3 }])).toBe(5)
+  })
+})

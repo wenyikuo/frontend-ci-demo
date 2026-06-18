@@ -7,3 +7,8 @@ export interface CartItem {
 export function cartTotal(items: CartItem[]): number {
   return items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 }
+
+// Total number of units across all cart items.
+export function cartItemCount(items: CartItem[]): number {
+  return items.reduce((n, item) => n + item.quantity, 0)
+}
