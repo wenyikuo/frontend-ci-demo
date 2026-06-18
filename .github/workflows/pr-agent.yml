@@ -1,0 +1,41 @@
+name: PR Agent
+
+# AI code review via the open-source PR-Agent, powered by an Anthropic Claude model.
+# Cost = Anthropic API token usage only (no per-repo / per-seat fee).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr_agent_job:
+    # React to PR events and to slash-commands in PR comments; ignore the bot's own posts.
+    if: ${{ github.event.sender.type != 'Bot' }}
+    runs-on: ubuntu-latest
+    name: Run PR-Agent
+    steps:
+      - name: PR Agent action step
+        id: pragent
+        uses: the-pr-agent/pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Anthropic auth (add ANTHROPIC_API_KEY as a repo Actions secret).
+          ANTHROPIC.KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Cheap, fast current model + a current fallback. PR-Agent doesn't
+          # know newer models' token limits, so set custom_model_max_tokens.
+          CONFIG.MODEL: "anthropic/claude-haiku-4-5"
+          CONFIG.FALLBACK_MODELS: '["anthropic/claude-sonnet-4-6"]'
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "200000"
+          # Re-run on PR updates (pushes), not just on open. Default omits
+          # "synchronize", so we add it here.
+          github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "synchronize"]'
+          # What to run automatically when a PR is opened/updated:
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "true"
