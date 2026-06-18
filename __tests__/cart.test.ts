@@ -1,4 +1,4 @@
-import { cartTotal } from '@/lib/cart'
+import { cartTotal, cartItemCount } from '@/lib/cart'
 
 describe('cartTotal', () => {
   it('sums price * quantity across items', () => {
@@ -17,7 +17,6 @@ describe('cartTotal', () => {
 
 describe('cartItemCount', () => {
   it('sums quantities', () => {
-    const { cartItemCount } = require('@/lib/cart') as typeof import('@/lib/cart')
     expect(cartItemCount([{ price: 1, quantity: 2 }, { price: 9, quantity: 3 }])).toBe(5)
   })
 })
