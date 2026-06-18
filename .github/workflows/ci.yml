@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  unit:
+    name: Unit & Integration (Jest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Runs unit + RTL component-integration tests and enforces the
+      # whole-project coverageThreshold from jest.config.ts.
+      - run: npm run test:cov
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+
+  patch-coverage:
+    name: Patch Coverage (diff-cover)
+    runs-on: ubuntu-latest
+    # Only meaningful on PRs (compares changed lines against the base branch).
+    if: github.event_name == 'pull_request'
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so diff-cover can diff against the base branch.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install diff-cover
+      # Produce a fresh lcov for this PR's code.
+      - run: npm run test:cov
+      - name: Enforce patch coverage on changed lines
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          diff-cover coverage/lcov.info \
+            --compare-branch="origin/${{ github.base_ref }}" \
+            --fail-under=90 \
+            --html-report coverage/diff-cover.html \
+            --markdown-report coverage/diff-cover.md
+      - name: Upload patch-coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-coverage
+          path: coverage/diff-cover.*
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
