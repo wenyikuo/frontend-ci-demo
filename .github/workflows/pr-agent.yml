@@ -27,10 +27,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Anthropic auth (add ANTHROPIC_API_KEY as a repo Actions secret).
           ANTHROPIC.KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Cheap, fast current model; falls back to a rock-solid one if the
-          # alias isn't recognized by the bundled litellm.
+          # Cheap, fast current model + a current fallback. PR-Agent doesn't
+          # know newer models' token limits, so set custom_model_max_tokens.
           CONFIG.MODEL: "anthropic/claude-haiku-4-5"
-          CONFIG.FALLBACK_MODELS: '["anthropic/claude-3-5-haiku-20241022"]'
+          CONFIG.FALLBACK_MODELS: '["anthropic/claude-sonnet-4-6"]'
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "200000"
           # What to run automatically when a PR is opened/updated:
           github_action_config.auto_review: "true"
           github_action_config.auto_describe: "true"
