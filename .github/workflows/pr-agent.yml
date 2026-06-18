@@ -32,6 +32,9 @@ jobs:
           CONFIG.MODEL: "anthropic/claude-haiku-4-5"
           CONFIG.FALLBACK_MODELS: '["anthropic/claude-sonnet-4-6"]'
           CONFIG.CUSTOM_MODEL_MAX_TOKENS: "200000"
+          # Re-run on PR updates (pushes), not just on open. Default omits
+          # "synchronize", so we add it here.
+          github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "synchronize"]'
           # What to run automatically when a PR is opened/updated:
           github_action_config.auto_review: "true"
           github_action_config.auto_describe: "true"
