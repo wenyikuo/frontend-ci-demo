@@ -1,0 +1,37 @@
+name: PR Agent
+
+# AI code review via the open-source PR-Agent, powered by an Anthropic Claude model.
+# Cost = Anthropic API token usage only (no per-repo / per-seat fee).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr_agent_job:
+    # React to PR events and to slash-commands in PR comments; ignore the bot's own posts.
+    if: ${{ github.event.sender.type != 'Bot' }}
+    runs-on: ubuntu-latest
+    name: Run PR-Agent
+    steps:
+      - name: PR Agent action step
+        id: pragent
+        uses: the-pr-agent/pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Anthropic auth (add ANTHROPIC_API_KEY as a repo Actions secret).
+          ANTHROPIC.KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Cheap, fast current model; falls back to a rock-solid one if the
+          # alias isn't recognized by the bundled litellm.
+          CONFIG.MODEL: "anthropic/claude-haiku-4-5"
+          CONFIG.FALLBACK_MODELS: '["anthropic/claude-3-5-haiku-20241022"]'
+          # What to run automatically when a PR is opened/updated:
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "true"
