@@ -11,3 +11,8 @@ export function multiply(a: number, b: number): number {
 export function isEven(n: number): boolean {
   return n % 2 === 0
 }
+
+// Untested on purpose: should trip the patch-coverage gate in the PR.
+export function divide(a: number, b: number): number {
+  return a / b
+}
