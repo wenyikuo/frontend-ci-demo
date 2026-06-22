@@ -1,0 +1,22 @@
+# Gemini Code Assist for GitHub — repo configuration
+# Docs: https://docs.cloud.google.com/gemini/docs/code-review/customize-repo-review
+have_fun: false
+
+code_review:
+  disable: false
+  # Only comment on issues at MEDIUM severity or above to keep reviews signal-rich.
+  comment_severity_threshold: MEDIUM
+  max_review_comments: -1
+  pull_request_opened:
+    help: false
+    summary: true      # post a PR summary when a PR is opened
+    code_review: true  # post an inline code review when a PR is opened
+    include_drafts: false
+
+# Files Gemini should skip when reviewing (generated / vendored output).
+ignore_patterns:
+  - "package-lock.json"
+  - "coverage/**"
+  - "playwright-report/**"
+  - "test-results/**"
+  - ".next/**"
