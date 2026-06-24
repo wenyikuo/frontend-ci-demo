@@ -22,7 +22,7 @@ export default function Counter({ initial = 0 }: { initial?: number }) {
         </button>
         <button
           type="button"
-          onClick={() => setCount((c) => add(c, 1))}
+          onClick={() => setCount((c) => add(c, 2))}
           className="rounded bg-blue-600 px-4 py-2 text-white"
           aria-label="increment"
         >
